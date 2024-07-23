@@ -1,0 +1,121 @@
+[Project]
+FileName = KillProcess4.gcc64.dev
+Name = KillProcess4
+Type = 0
+Ver = 3
+Includes = 
+Libs = 
+Bins = 
+ResourceIncludes = 
+MakeIncludes = 
+PrivateResource = KillProcess_private.rc
+Compiler = 
+CppCompiler = 
+Linker = -lpsapi -lversion
+ResourceCommand = 
+IsCpp = 0
+Icon = app.ico
+ExeOutput = 
+ObjectOutput = obj/gcc64
+LogOutput = 
+LogOutputEnabled = 0
+OverrideOutput = 1
+OverrideOutputName = KillProcess4.gcc64.exe
+HostApplication = 
+UseCustomMakefile = 0
+CustomMakefile = 
+UsePrecompiledHeader = 0
+PrecompiledHeader = 
+CommandLine = 
+Folders = 
+IncludeVersionInfo = 1
+SupportXPThemes = 0
+CompilerSet = 0
+StaticLink = 1
+AddCharset = 1
+ExecEncoding = SYSTEM
+Encoding = windows-1252
+ModelType = 0
+ClassBrowserType = 1
+AllowParallelBuilding = false
+ParellelBuildingJobs = 0
+UseUTF8 = 0
+UnitCount = 4
+
+
+[VersionInfo]
+Major = 4
+Minor = 0
+Release = 15
+Build = 67
+LanguageID = 1033
+CharsetID = 1252
+CompanyName = /-\\\\. |\\\\|. - Software
+FileVersion = 4.0.15.67
+FileDescription = Show and Kill Processes - Version 4
+InternalName = 
+LegalCopyright = Alexander Neumeister © 2024
+LegalTrademarks = 
+OriginalFilename = KillProcess4.exe
+ProductName = Kill Process 4
+ProductVersion = 4.0.15.67
+AutoIncBuildNr = 1
+SyncProduct = 1
+
+
+[Unit1]
+FileName = KillProcess.h
+CompileCpp = 0
+Folder = Headers
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = UTF-8
+
+
+[Unit2]
+FileName = Resource.h
+CompileCpp = 0
+Folder = Headers
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = UTF-8
+
+
+[Unit3]
+FileName = KillProcess.c
+CompileCpp = 0
+Folder = Sources
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = windows-1252
+
+
+[Unit4]
+FileName = Resource.rc
+Folder = Resources
+Compile = 1
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = UTF-8
+CompileCpp = 0
+
+
+[CompilerSettings]
+cc_cmd_opt_optimize = 2
+cc_cmd_opt_use_pipe = on
+link_cmd_opt_strip_exe = on
