@@ -37,12 +37,20 @@ MAINMENU MENU
   }
 }
 
-DLG_DISPLAY DIALOGEX DISCARDABLE 6, 18, 210, 142
+DLG_DISPLAY_LINE DIALOGEX DISCARDABLE 6, 18, 210, 142
 STYLE WS_POPUP|DS_MODALFRAME|DS_3DLOOK|WS_CAPTION|WS_SYSMENU|WS_VISIBLE|WS_SIZEBOX
 CAPTION "Display"
 FONT 8, "Consolas", 0, 0, 1
 {
   CONTROL "the text comes to here ...", IDD_DISP_TEXT, "Static", WS_BORDER, 0, 0, 208, 140
+}
+
+DLG_DISPLAY_LIST DIALOGEX DISCARDABLE 6, 18, 210, 142
+STYLE WS_POPUP|DS_MODALFRAME|DS_3DLOOK|WS_CAPTION|WS_SYSMENU|WS_VISIBLE|WS_SIZEBOX
+CAPTION "Display"
+FONT 8, "Consolas", 0, 0, 1
+{
+  CONTROL "the text comes to here ...", IDD_DISP_TEXT, "ListBox", WS_BORDER|ES_AUTOHSCROLL|WS_VSCROLL, 0, 0, 208, 140
 }
 
 DLG_FILTER DIALOGEX DISCARDABLE 6, 18, 210, 88
@@ -98,8 +106,8 @@ FONT 8, "Tahoma", 0, 0, 1
 
 #if 0
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 4,0,12,101
-PRODUCTVERSION 4,0,12,101
+FILEVERSION 4,0,19,101
+PRODUCTVERSION 4,0,19,101
 FILEFLAGSMASK 0x0
 FILEFLAGS 0x0
 FILEOS VOS_UNKNOWN
@@ -112,11 +120,11 @@ FILESUBTYPE VFT2_UNKNOWN
     {
       VALUE "CompanyName", "/-\\\\. |\\\\|. - Software\0"
       VALUE "FileDescription", "Show and Kill Processes - Version 4\0"
-      VALUE "FileVersion", "4.0.12.101\0"
+      VALUE "FileVersion", "4.0.19.101\0"
       VALUE "InternalName", "Kill Process 4\0"
       VALUE "OriginalFilename", "KillProcess4.exe\0"
       VALUE "ProductName", "Kill Process 4\0"
-      VALUE "ProductVersion", "4.0.12.101\0"
+      VALUE "ProductVersion", "4.0.19.101\0"
     }
   }
   BLOCK "VarFileInfo"

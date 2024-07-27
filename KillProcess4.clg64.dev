@@ -31,8 +31,8 @@ CommandLine =
 Folders = 
 IncludeVersionInfo = 1
 SupportXPThemes = 0
-CompilerSet = 4
-StaticLink = 1
+CompilerSet = 0
+StaticLink = 0
 AddCharset = 1
 ExecEncoding = SYSTEM
 Encoding = windows-1252
@@ -44,11 +44,11 @@ UseUTF8 = 0
 
 
 [Unit1]
-FileName = Resource.rc
+FileName = KillProcess.c
 CompileCpp = 0
-Folder = Resources
+Folder = Sources
 Compile = 1
-Link = 0
+Link = 1
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
@@ -57,52 +57,6 @@ RealEncoding = ASCII
 
 
 [Unit2]
-FileName = Resource.h
-CompileCpp = 0
-Folder = Headers
-Compile = 0
-Link = 0
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = windows-1252
-
-
-[Unit3]
-FileName = KillProcess.c
-Folder = Sources
-Compile = 1
-Link = 1
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = windows-1252
-CompileCpp = 0
-
-
-[VersionInfo]
-Major = 4
-Minor = 0
-Release = 17
-Build = 243
-LanguageID = 1033
-CharsetID = 1252
-CompanyName = /-\\\\. |\\\\|. - Software
-FileVersion = 4.0.17.243
-FileDescription = Show and Kill Processes - Version 4
-InternalName = Kill Process 4
-LegalCopyright = 
-LegalTrademarks = 
-OriginalFilename = KillProcess4.exe
-ProductName = Kill Process 4
-ProductVersion = 4.0.17.243
-AutoIncBuildNr = 1
-SyncProduct = 1
-
-
-[Unit4]
 FileName = KillProcess.h
 CompileCpp = 0
 Folder = Headers
@@ -115,7 +69,54 @@ FileEncoding = PROJECT
 RealEncoding = windows-1252
 
 
+[Unit3]
+FileName = Resource.h
+Folder = Headers
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = windows-1252
+CompileCpp = 0
+
+
+[VersionInfo]
+Major = 4
+Minor = 0
+Release = 20
+Build = 259
+LanguageID = 1033
+CharsetID = 1252
+CompanyName = /-\\\\. |\\\\|. - Software
+FileVersion = 4.0.20.259
+FileDescription = Show and Kill Processes - Version 4
+InternalName = Kill Process 4
+LegalCopyright = 
+LegalTrademarks = 
+OriginalFilename = KillProcess4.exe
+ProductName = Kill Process 4
+ProductVersion = 4.0.20.259
+AutoIncBuildNr = 1
+SyncProduct = 1
+
+
+[Unit4]
+FileName = Resource.rc
+CompileCpp = 0
+Folder = Resources
+Compile = 1
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = windows-1252
+
+
 [CompilerSettings]
+c_cmd_opt_std = 
 cc_cmd_opt_optimize = 2
 cc_cmd_opt_std = 
 cc_cmd_opt_use_pipe = on

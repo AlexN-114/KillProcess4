@@ -60,10 +60,14 @@ int KillMulti(HWND hDlg);
 BOOL KillProcess( PTASK_LIST tlist, BOOL fForce );
 int CreateLine(TASK_LIST t, char *Line, int lng);
 int CreateLineInfo(TASK_LIST t, char *Line, int lng);
+BOOL ListProcessModules( DWORD dwPID, HWND hwnd);
+BOOL ListProcessThreads( DWORD dwPID, HWND hwnd);
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 static LRESULT CALLBACK DlgProcFilter(HWND hwndEDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 static LRESULT CALLBACK DlgProcShow(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-static LRESULT CALLBACK DlgDisplay(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK DlgDisplayL(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK DlgDisplayM(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK DlgDisplayT(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 #if WINVER < 0x0500
     #define sprintf_s(x,y,z,...) sprintf(x,z,##__VA_ARGS__)
