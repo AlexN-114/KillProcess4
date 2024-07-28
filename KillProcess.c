@@ -844,6 +844,7 @@ static LRESULT CALLBACK DlgDisplayL(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
     case WM_INITDIALOG:
         {
             int i = SendMessage(GetDlgItem(hwnd_main, IDC_MAIN_TEXT), LB_GETCURSEL, 0, 0);
+            hwnd_disp = hwndDlg;
             MoveWindow(hwndDlg, rMain.left + 50, rMain.top + 50, rMain.right - rMain.left - 100, rMain.bottom - rMain.top - 100, TRUE);
             CreateLineInfo(slist[i], hStr, sizeof(hStr));
             SetDlgItemText(hwndDlg, IDD_DISP_TEXT, hStr);
@@ -1070,6 +1071,7 @@ static LRESULT CALLBACK DlgProcFilter(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
             MoveWindow(hwndDlg, rMain.left + 100, rMain.top + 100, hRect.right - hRect.left, hRect.bottom - hRect.top, TRUE);
             SetTimer(hwndDlg, IDT_CHANGED_FILT, 100, NULL);
             SetFocus(hwndDlg);
+            ShowWindow(hwnd_sedit, SW_HIDE);
         }
         return TRUE;
 
@@ -1088,7 +1090,9 @@ static LRESULT CALLBACK DlgProcFilter(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
             GetDlgItemText(hwndDlg, IDD_EDIT_NAME, filt_name, sizeof(filt_name));
             GetDlgItemText(hwndDlg, IDD_EDIT_PID, filt_pid, sizeof(filt_pid ));
             GetProcessList(hwnd_main);
+            ShowWindow(hwnd_sedit, SW_SHOW);
             hwnd_filt = NULL;
+                    KillTimer(hwndDlg, IDT_CHANGED_FILT);
             EndDialog(hwndDlg, TRUE);
             return TRUE;
 
@@ -1097,8 +1101,11 @@ static LRESULT CALLBACK DlgProcFilter(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
             filt_pid[0]  = 0;
             SendMessage(hwnd_StatusBar, SB_SETTEXT, 1, (LPARAM)filt_name);
             SendMessage(hwnd_StatusBar, SB_SETTEXT, 2, (LPARAM)filt_pid);
+                    SetWindowText(hwnd_sedit, "");
             GetProcessList(hwnd_main);
+            ShowWindow(hwnd_sedit, SW_SHOW);
             hwnd_filt = NULL;
+                    KillTimer(hwndDlg, IDT_CHANGED_FILT);
             EndDialog(hwndDlg, FALSE);
             return TRUE;
         }
@@ -1114,22 +1121,23 @@ static LRESULT CALLBACK DlgProcFilter(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
     case WM_TIMER:
         if (wParam == IDT_CHANGED_FILT)
         {
-            //TODO
+            //Timer-functions for Filter
             changed = 0;
 
             GetDlgItemText(hwndDlg, IDD_EDIT_NAME, hStr, sizeof(hStr));
             if (strcmp(hStr, filt_name) != 0)
             {
-                //TODO
+                //Name changed
                 strcpy(filt_name, hStr);
                 SendMessage(hwnd_StatusBar, SB_SETTEXT, 1, (LPARAM)hStr);
+                SetWindowText(hwnd_sedit,hStr);
                 changed = 1;
             }
 
             GetDlgItemText(hwndDlg, IDD_EDIT_PID, hStr, sizeof(hStr));
             if (strcmp(hStr, filt_pid) != 0)
             {
-                //TODO
+                //PID changed
                 for (int i = 0; i < strlen(hStr); i++)
                 {
                     //TODO
@@ -1155,6 +1163,7 @@ static LRESULT CALLBACK DlgProcFilter(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
     case WM_CLOSE:
         hwnd_filt = NULL;
+        ShowWindow(hwnd_sedit, SW_SHOW);
         EndDialog(hwndDlg, 0);
         return TRUE;
 
@@ -1716,7 +1725,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return 0;
     }
 
-    ShowWindow(hwnd, 1);
+    ShowWindow(hwnd, SW_SHOW);
     UpdateWindow(hwnd);
 
     hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(ID_TASTATUR));
