@@ -2,6 +2,7 @@
 #define IDC_MAIN_TEXT      1001
 #define ID_STATUSBAR       1002
 #define ID_TASTATUR        1003
+#define IDC_MAIN_HEAD      1004
 
 #define DLG_FILTER         2001
 #define DLG_SHOW           2002

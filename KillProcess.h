@@ -59,6 +59,7 @@ int Kill(HWND hDlg);
 int KillMulti(HWND hDlg);
 BOOL KillProcess( PTASK_LIST tlist, BOOL fForce );
 int CreateLine(TASK_LIST t, char *Line, int lng);
+int CreateHead(char *Line, int lng);
 int CreateLineInfo(TASK_LIST t, char *Line, int lng);
 BOOL ListProcessModules( DWORD dwPID, HWND hwnd);
 BOOL ListProcessThreads( DWORD dwPID, HWND hwnd);
