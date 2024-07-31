@@ -44,16 +44,16 @@ UseUTF8 = 0
 
 
 [Unit1]
-FileName = .
+FileName = Resource.rc
 CompileCpp = 0
-Folder = 
+Folder = Resources
 Compile = 1
-Link = 1
+Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = ASCII
+RealEncoding = windows-1252
 
 
 [Unit3]
@@ -90,16 +90,16 @@ SyncProduct = 1
 
 
 [Unit4]
-FileName = Resource.rc
+FileName = .
 CompileCpp = 0
-Folder = Resources
+Folder = 
 Compile = 1
-Link = 0
+Link = 1
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = windows-1252
+RealEncoding = ASCII
 
 
 [Unit2]

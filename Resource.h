@@ -23,6 +23,7 @@
 #define IDD_SHOW_TITLE     4016
 #define IDD_SHOW_THREADS   4018
 #define IDD_SHOW_HWND      4020
+#define IDD_SHOW_PRIO      4022
 
 #define IDD_DISP_TEXT      4100
 #define IDD_STAT_EDIT      4101

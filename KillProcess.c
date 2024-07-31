@@ -16,7 +16,7 @@ char versStr[50];
 char trenner[5] = "|";
 TASK_LIST tlist[1024];
 TASK_LIST slist[1024];
-SHOW show = {7, 0, 30, 40, 30, 5, 8};
+SHOW show = {7, 0, 30, 40, 30, 5, 8, 5};
 int iStatusWidths[] = {100, 225, 350, -1};
 HWND hwnd_main = NULL;
 HWND hwnd_header = NULL;
@@ -290,7 +290,7 @@ int PrintModules( DWORD processID )
             {
                 // Print the module name and handle value.
 
-                printf( TEXT("\t%s (0x%08X)\n"), szModName, hMods[i] );
+                printf( TEXT("\t%s (0x%08X)\n"), szModName, (size_t)hMods[i] );
             }
         }
     }
@@ -529,6 +529,16 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         bis++;
     }
 
+    if ((show.prio > 0) && ((bis + show.prio) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%%dd", show.prio);
+        sprintf(&Line[bis], fStr, t.pcPriClassBase);
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+
     Line[bis] = 0;
 
     return bis;
@@ -610,6 +620,16 @@ int CreateHead(char *Line, int lng)
         //TODO
         sprintf(fStr, "%%%ds", show.hwnd);
         sprintf(&Line[bis], fStr, "HWND");
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+
+    if ((show.prio > 0) && ((bis + show.prio) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%%ds", show.prio);
+        sprintf(&Line[bis], fStr, "Prio");
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
@@ -697,6 +717,17 @@ int CreateLineInfo(TASK_LIST t, char *Line, int lng)
         strcat_s(Line, lng - strlen(Line), "\r\n");
     }
 
+    if (show.prio > 0)
+    {
+        //TODO
+        sprintf_s(fStr, sizeof(fStr), "%%-%dd", show.prio);
+        sprintf_s(hStr, sizeof(fStr), fStr, t.pcPriClassBase);
+
+        strcat_s(Line, lng - strlen(Line), "BasePrio  : ");
+        strcat_s(Line, lng - strlen(Line), hStr);
+        strcat_s(Line, lng - strlen(Line), "\r\n");
+    }
+
     return strlen(Line);
 }
 
@@ -710,6 +741,7 @@ BOOL GetProcessList(HWND hWnd)
     char hStr[500];
     int oldCnt = 0;
     int oldListTasks = listTasks;
+    RECT r;
 
     memset(tlist, 0, sizeof(tlist));
     listTasks = 0;
@@ -772,6 +804,7 @@ BOOL GetProcessList(HWND hWnd)
         tlist[numTasks].flags = pe32.dwFlags;
         tlist[numTasks].cntThreads = pe32.cntThreads;
         tlist[numTasks].dwModuleId = pe32.th32ModuleID;
+        tlist[numTasks].pcPriClassBase = pe32.pcPriClassBase;
         GetFirstModulePath(pe32.th32ProcessID, tlist[numTasks].ModulePath);
         //GetProcessImageFileName(hProcess, tlist[numTasks].ModulePath,sizeof(tlist[numTasks].ModulePath));
         tlist[numTasks].hwnd = find_main_window(pe32.th32ProcessID);
@@ -1081,6 +1114,8 @@ static LRESULT CALLBACK DlgProcShow(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
                 SetDlgItemText(hwndDlg, IDD_SHOW_THREADS, hStr);
                 itoa(show.hwnd, hStr, 10);
                 SetDlgItemText(hwndDlg, IDD_SHOW_HWND, hStr);
+                itoa(show.prio, hStr, 10);
+                SetDlgItemText(hwndDlg, IDD_SHOW_PRIO, hStr);
             }
             return TRUE;
 
@@ -1102,6 +1137,8 @@ static LRESULT CALLBACK DlgProcShow(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
                     show.cntThreads = atoi(hStr);
                     GetDlgItemText(hwndDlg, IDD_SHOW_HWND, hStr, sizeof(hStr));
                     show.hwnd = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_PRIO, hStr, sizeof(hStr));
+                    show.prio = atoi(hStr);
 
                     GetProcessList(hwnd_main);
 

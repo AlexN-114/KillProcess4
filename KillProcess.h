@@ -13,6 +13,7 @@ typedef struct _TASK_LIST
     DWORD       dwParentProcessId;
     DWORD       dwModuleId;
     DWORD       cntThreads;
+    DWORD       pcPriClassBase;
     DWORD       dwInheritedFromProcessId;
     BOOL        flags;
     HANDLE      hwnd;
@@ -30,6 +31,8 @@ typedef struct _SHOW
     int title;
     int cntThreads;
     int hwnd;
+    int prio;
+//    int reserve;
 } SHOW, *PSHOW;
 
 typedef struct _handle_data
