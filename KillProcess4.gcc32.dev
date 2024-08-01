@@ -72,19 +72,19 @@ CompileCpp = 0
 [VersionInfo]
 Major = 4
 Minor = 0
-Release = 20
-Build = 241
+Release = 24
+Build = 247
 LanguageID = 1033
 CharsetID = 1252
 CompanyName = /-\\\\. |\\\\|. - Software
-FileVersion = 4.0.20.241
+FileVersion = 4.0.24.247
 FileDescription = Show and Kill Processes - Version 4
 InternalName = Kill Process 4
 LegalCopyright = 
 LegalTrademarks = 
 OriginalFilename = KillProcess4.exe
 ProductName = Kill Process 4
-ProductVersion = 4.0.20.241
+ProductVersion = 4.0.24.247
 AutoIncBuildNr = 1
 SyncProduct = 1
 

@@ -908,6 +908,8 @@ BOOL GetProcessList(HWND hWnd)
     {
         SendMessage(hTList, LB_SETTOPINDEX, iTopItem, 0);
         SendMessage(hTList, LB_SETCARETINDEX, iCaretItem, 0);
+        iTopItem = 0;
+        iCaretItem = 0;
     }
 
     return ( TRUE );
@@ -1526,9 +1528,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 //TODO
                 SendMessage(hwnd_client, LB_SETTOPINDEX, iTopItem, 0);
                 SendMessage(hwnd_client, LB_SETCARETINDEX, iCaretItem, 0);
-                // SendMessage(hwnd_client, LB_SETSEL , iTopItem, 0);
-                // UpdateWindow(hwnd_main);
                 iTopItem = 0;
+                iCaretItem = 0;
             }
             
             
