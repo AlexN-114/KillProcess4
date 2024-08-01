@@ -17,9 +17,11 @@ typedef struct _TASK_LIST
     DWORD       dwInheritedFromProcessId;
     BOOL        flags;
     HANDLE      hwnd;
+    WORD        is64;
     CHAR        ProcessName[PROCESS_SIZE];
     CHAR        WindowTitle[TITLE_SIZE];
     char        ModulePath[MAX_PATH];
+    char        SystemPath[MAX_PATH];
 } TASK_LIST, *PTASK_LIST;
 
 typedef struct _SHOW
@@ -32,6 +34,7 @@ typedef struct _SHOW
     int cntThreads;
     int hwnd;
     int prio;
+    int is64;
 //    int reserve;
 } SHOW, *PSHOW;
 
