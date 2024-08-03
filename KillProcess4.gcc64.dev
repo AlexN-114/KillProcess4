@@ -46,19 +46,19 @@ UnitCount = 4
 [VersionInfo]
 Major = 4
 Minor = 0
-Release = 20
-Build = 74
+Release = 24
+Build = 78
 LanguageID = 1033
 CharsetID = 1252
 CompanyName = /-\\\\. |\\\\|. - Software
-FileVersion = 4.0.20.74
+FileVersion = 4.0.24.78
 FileDescription = Show and Kill Processes - Version 4
 InternalName = 
 LegalCopyright = Alexander Neumeister © 2024
 LegalTrademarks = 
 OriginalFilename = KillProcess4.exe
 ProductName = Kill Process 4
-ProductVersion = 4.0.20.74
+ProductVersion = 4.0.24.78
 AutoIncBuildNr = 1
 SyncProduct = 1
 
@@ -77,19 +77,6 @@ RealEncoding = UTF-8
 
 
 [Unit2]
-FileName = KillProcess.c
-CompileCpp = 0
-Folder = Sources
-Compile = 1
-Link = 1
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = windows-1252
-
-
-[Unit3]
 FileName = Resource.h
 CompileCpp = 0
 Folder = Headers
@@ -100,6 +87,19 @@ OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
 RealEncoding = UTF-8
+
+
+[Unit3]
+FileName = KillProcess.c
+CompileCpp = 0
+Folder = Sources
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = windows-1252
 
 
 [Unit4]

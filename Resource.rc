@@ -106,8 +106,8 @@ FONT 8, "Tahoma", 0, 0, 1
 
 #ifndef _DEV_CPP
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 4,0,22,105
-PRODUCTVERSION 4,0,22,105
+FILEVERSION 4,0,24,106
+PRODUCTVERSION 4,0,24,106
 FILEFLAGSMASK 0x0
 FILEFLAGS 0x0
 FILEOS VOS_UNKNOWN
@@ -120,11 +120,11 @@ FILESUBTYPE VFT2_UNKNOWN
     {
       VALUE "CompanyName", "/-\\\\. |\\\\|. - Software\0"
       VALUE "FileDescription", "Show and Kill Processes - Version 4\0"
-      VALUE "FileVersion", "4.0.22.105\0"
+      VALUE "FileVersion", "4.0.24.106\0"
       VALUE "InternalName", "Kill Process 4\0"
       VALUE "OriginalFilename", "KillProcess4.exe\0"
       VALUE "ProductName", "Kill Process 4\0"
-      VALUE "ProductVersion", "4.0.22.105\0"
+      VALUE "ProductVersion", "4.0.24.106\0"
     }
   }
   BLOCK "VarFileInfo"

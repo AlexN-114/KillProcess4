@@ -3,6 +3,7 @@
 #include <commctrl.h>
 #include <tlhelp32.h>
 #include <psapi.h>
+#include <wow64apiset.h> 
 #include <stdio.h>
 
 #include "KillProcess.h"
@@ -16,7 +17,7 @@ char versStr[50];
 char trenner[5] = "|";
 TASK_LIST tlist[1024];
 TASK_LIST slist[1024];
-SHOW show = {7, 0, 25, 40, 30, 5, 8, 5, 0};
+SHOW show = {7, 0, 25, 40, 30, 5, 8, 5, 3};
 int iTopItem = 0;
 int iCaretItem = 0;
 int iStatusWidths[] = {100, 225, 350, -1};
@@ -473,6 +474,7 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         //TODO
         sprintf(fStr, "%%%dd", show.parent_pid);
         sprintf(&Line[bis], fStr, t.dwParentProcessId);
+        Line[bis + show.parent_pid] = 0;
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
@@ -483,13 +485,13 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         //TODO
         //if (0x14c==t.is64){t.is64=0x386;}
         sprintf(fStr, "%%%dX", show.is64);
-        sprintf(&Line[bis], fStr, t.is64);
-        Line[bis + show.name] = 0;
+        sprintf(&Line[bis], fStr, t.is64?0x32:0x64);
+        Line[bis + show.is64] = 0;
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
     }
-    
+
     if ((show.name > 0) && ((bis + show.name) < lng))
     {
         //TODO
@@ -528,6 +530,7 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         //TODO
         sprintf(fStr, "%%%dd", show.cntThreads);
         sprintf(&Line[bis], fStr, t.cntThreads);
+        Line[bis + show.cntThreads] = 0;
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
@@ -538,6 +541,7 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         //TODO
         sprintf(fStr, "%%%dX", show.hwnd);
         sprintf(&Line[bis], fStr, t.hwnd);
+        Line[bis + show.title] = 0;
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
@@ -548,6 +552,7 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         //TODO
         sprintf(fStr, "%%%dd", show.prio);
         sprintf(&Line[bis], fStr, t.pcPriClassBase);
+        Line[bis + show.prio] = 0;
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
@@ -595,7 +600,7 @@ int CreateHead(char *Line, int lng)
         Line[bis] = trenner[0];
         bis++;
     }
-    
+
     if ((show.name > 0) && ((bis + show.name) < lng))
     {
         //TODO
@@ -775,14 +780,14 @@ BOOL GetProcessList(HWND hWnd)
 
     oldCnt = SendMessage(hTList, LB_GETCOUNT, 0, 0);
     oldListTasks = (oldCnt > oldListTasks) ? oldCnt : oldListTasks;
-  
-    if(0 == iTopItem)
+
+    if (0 == iTopItem)
     {
         // if zero get current value
         iTopItem = SendMessage(hTList, LB_GETTOPINDEX, 0, 0);
         iCaretItem = SendMessage(hTList, LB_GETCARETINDEX, 0, 0);
     }
-    
+
 
     EnableDebugPrivNT();
 
@@ -790,7 +795,7 @@ BOOL GetProcessList(HWND hWnd)
     hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
     if ( hProcessSnap == INVALID_HANDLE_VALUE )
     {
-        MessageBox(hwnd_main,"CreateToolhelp32Snapshot (of processes)","Error",MB_ICONERROR);
+        MessageBox(hwnd_main, "CreateToolhelp32Snapshot (of processes)", "Error", MB_ICONERROR);
         return ( FALSE );
     }
 
@@ -824,10 +829,10 @@ BOOL GetProcessList(HWND hWnd)
         }
         else
         {
-            IsWow64Process(hProcess, &tlist[numTasks].is64);
+            IsWow64Process(hProcess, (PBOOL)&tlist[numTasks].is64);
             dwPriorityClass = GetPriorityClass( hProcess );
             //if ( !dwPriorityClass )
-                // printError( TEXT("GetPriorityClass") );
+            // printError( TEXT("GetPriorityClass") );
             CloseHandle( hProcess );
         }
 
@@ -847,7 +852,7 @@ BOOL GetProcessList(HWND hWnd)
         if (FilterItem(tlist[numTasks]))
         {
             char xStr[sizeof(hStr)] = "";
-            int oldCnt = 0;
+            
             slist[listTasks] = tlist[numTasks];
             // sprintf_s(hStr, sizeof(hStr), "%7d %7d %s", pe32.th32ProcessID, pe32.th32ParentProcessID, pe32.szExeFile);
 
@@ -881,6 +886,12 @@ BOOL GetProcessList(HWND hWnd)
 // _tprintf( TEXT("\n  Priority class    = %d"), dwPriorityClass );
 
         }
+        
+        for(int i=1; i<numTasks;i++)
+        {
+            GetProcessInfo(&slist[i]);
+        }
+        
     }
     while (Process32Next(hProcessSnap, &pe32));
 
@@ -898,13 +909,13 @@ BOOL GetProcessList(HWND hWnd)
     char xStr[sizeof(hStr)];
     CreateHead(hStr, sizeof(hStr));
     SendMessage(hwnd_header, WM_GETTEXT, sizeof(xStr), (LPARAM)xStr);
-    
+
     if (strcmp(hStr, xStr) != 0)
     {
         SendMessage(hwnd_header, WM_SETTEXT, 0, (LPARAM)hStr);
     }
-    
-    if(0 < iTopItem)
+
+    if (0 < iTopItem)
     {
         SendMessage(hTList, LB_SETTOPINDEX, iTopItem, 0);
         SendMessage(hTList, LB_SETCARETINDEX, iCaretItem, 0);
@@ -913,6 +924,31 @@ BOOL GetProcessList(HWND hWnd)
     }
 
     return ( TRUE );
+}
+
+
+BOOL GetProcessInfo( PTASK_LIST tlist )
+{
+    HANDLE hProcess=0;
+
+    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, tlist->dwProcessId );
+    if (hProcess)
+    {
+        USHORT c, d;
+        BOOL b;
+
+        IsWow64Process(hProcess, (PBOOL)&b);
+        //IsWow64Process2(hProcess, &c, &d);
+        CloseHandle( hProcess );
+        tlist->is64 = b;
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 BOOL KillProcess( PTASK_LIST tlist, BOOL fForce )
@@ -1523,7 +1559,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 MoveWindow(hwnd_sedit, rStatus.left + iStatusWidths[0] + 2, rStatus.top + 2, iStatusWidths[2] - iStatusWidths[1], rStatus.bottom - rStatus.top - 2, TRUE);
                 ShowWindow(hwnd_sedit, SW_SHOW);
             }
-            if(0 < iTopItem)
+            if (0 < iTopItem)
             {
                 //TODO
                 SendMessage(hwnd_client, LB_SETTOPINDEX, iTopItem, 0);
@@ -1531,8 +1567,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 iTopItem = 0;
                 iCaretItem = 0;
             }
-            
-            
+
+
             break;
         }
         case WM_MOVE:
@@ -1555,8 +1591,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 case CM_FILE_REFRESH:
                     //SendMessage(GetDlgItem(hwnd, IDC_MAIN_TEXT), LB_ADDSTRING,0,(WPARAM)"Eins");
                     GetProcessList(hwnd);
-                
-                break;
+
+                    break;
 
                 case CM_FILE_KILL:
                     Kill(hwnd);
@@ -1641,18 +1677,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                     POINT pt;
                     short x = GetAsyncKeyState(VK_LBUTTON);
                     short y = GetAsyncKeyState(VK_RBUTTON);
+                    int i;
                     GetCursorPos(&pt);
 
                     LPARAM l = 0 + ((listTasks - 1) << 16);
                     SendMessage(hwnd_client, LB_SELITEMRANGE, FALSE, l);
+                    
+                    i = SendMessage(hwnd_client, LB_GETCURSEL,0,0);
+                    for(i=1; i<numTasks;i++)
+                    {
+                        GetProcessInfo(&slist[i]);
+                    }
                     if (PtInRect(&rMain, pt))
                     {
                         char hStr[200];
-                        sprintf(hStr, "Pkt  %d/%d\r\nRect %d/%d %d/%d\r\nMB  L=%d R=%d",
+                        sprintf(hStr, "Pkt  %d/%d\r\nRect %d/%d %d/%d\r\nMB  L=%d R=%d\r\nWSW  %d",
                                 pt.x, pt.y,
                                 rMain.left, rMain.right,
                                 rMain.top, rMain.bottom,
-                                x, y);
+                                x, y,
+                                slist[i].is64);
                         MessageBox(hwnd, hStr, "Test", MB_OK);
                     }
                 }
@@ -1870,7 +1914,7 @@ void ReadFromPipe(void)
     ReadFile(hPipe, &show, sizeof(show), NULL, NULL);
     ReadFile(hPipe, &iTopItem, sizeof(iTopItem), NULL, NULL);
     ReadFile(hPipe, &iCaretItem, sizeof(iCaretItem), NULL, NULL);
-    
+
     CloseHandle(hPipe);
     hPipe = NULL;
 
