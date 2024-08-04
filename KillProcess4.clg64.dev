@@ -10,7 +10,7 @@ Bins =
 ResourceIncludes = 
 MakeIncludes = 
 PrivateResource = KillProcess_private.rc
-Compiler = 
+Compiler = -D_WIN32_WINNT=0x0501
 CppCompiler = 
 Linker = -lpsapi -lversion
 ResourceCommand = -D_DEV_CPP
@@ -57,6 +57,52 @@ RealEncoding = windows-1252
 
 
 [Unit2]
+FileName = Resource.h
+CompileCpp = 0
+Folder = Headers
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
+
+[Unit3]
+FileName = KillProcess.c
+Folder = Sources
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+CompileCpp = 0
+
+
+[VersionInfo]
+Major = 4
+Minor = 0
+Release = 26
+Build = 444
+LanguageID = 1033
+CharsetID = 1252
+CompanyName = /-\\\\. |\\\\|. - Software
+FileVersion = 4.0.26.444
+FileDescription = Show and Kill Processes - Version 4
+InternalName = Kill Process 4
+LegalCopyright = 
+LegalTrademarks = 
+OriginalFilename = KillProcess4.exe
+ProductName = Kill Process 4
+ProductVersion = 4.0.26.444
+AutoIncBuildNr = 1
+SyncProduct = 1
+
+
+[Unit4]
 FileName = Resource.rc
 CompileCpp = 0
 Folder = Resources
@@ -66,53 +112,7 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = windows-1252
-
-
-[Unit3]
-FileName = Resource.h
-Folder = Headers
-Compile = 0
-Link = 0
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = windows-1252
-CompileCpp = 0
-
-
-[VersionInfo]
-Major = 4
-Minor = 0
-Release = 24
-Build = 408
-LanguageID = 1033
-CharsetID = 1252
-CompanyName = /-\\\\. |\\\\|. - Software
-FileVersion = 4.0.24.408
-FileDescription = Show and Kill Processes - Version 4
-InternalName = Kill Process 4
-LegalCopyright = 
-LegalTrademarks = 
-OriginalFilename = KillProcess4.exe
-ProductName = Kill Process 4
-ProductVersion = 4.0.24.408
-AutoIncBuildNr = 1
-SyncProduct = 1
-
-
-[Unit4]
-FileName = KillProcess.c
-CompileCpp = 0
-Folder = Sources
-Compile = 1
-Link = 1
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = windows-1252
+RealEncoding = ASCII
 
 
 [CompilerSettings]
