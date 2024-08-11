@@ -37,6 +37,7 @@
 #define IDT_CHANGED_MAIN   3002
 #define IDT_ACTION         3003
 #define IDT_REFRESH        3004
+#define IDT_REFRESH_LINE   3005
 
 #define CM_FILE_REFRESH    9001
 #define CM_FILE_KILL       9002
@@ -51,6 +52,7 @@
 #define CM_ABOUT           9041
 #define CM_SYSTEMINFO      9042
 #define CM_TEST            9101
+#define CM_CHANGE_FOKUS    9102
 #define CM_CMENU_LINE      9201
 #define CM_CMENU_MODULES   9202
 #define CM_CMENU_THREADS   9203

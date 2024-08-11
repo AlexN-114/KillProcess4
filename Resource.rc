@@ -22,15 +22,20 @@ MAINMENU MENU
     MENUITEM "&Filter Processes\tCtrl-F", CM_FILE_FILT
     MENUITEM "&Clear Filter\tCtrl-Shift-F", CM_FILE_FILT_CLR
     MENUITEM SEPARATOR
-    MENUITEM "Select &All\t+", CM_FILE_ALL
-    MENUITEM "Select &Non\t-", CM_FILE_NON
-    MENUITEM SEPARATOR
-    MENUITEM "Re&start as Admin\tCtrl-S", CM_FILE_RESTART
     MENUITEM "E&xit\tCtrl-X", CM_FILE_EXIT
   }
   POPUP "&Options"
   {
     MENUITEM "&Shown Elements\tCtrl-O", CM_OPT_SHOW
+  }
+  POPUP "&Tools"
+  {
+    MENUITEM "Select &All\t+", CM_FILE_ALL
+    MENUITEM "Select &Non\t-", CM_FILE_NON
+    MENUITEM SEPARATOR
+    MENUITEM "Re&start as Admin\tCtrl-S", CM_FILE_RESTART
+    MENUITEM SEPARATOR
+    MENUITEM "Change Fok&us\tCtrl-U", CM_CHANGE_FOKUS
   }
   POPUP "&Help"
   {
@@ -110,8 +115,8 @@ FONT 8, "Tahoma", 0, 0, 1
 
 #ifndef _DEV_CPP
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 4,0,24,106
-PRODUCTVERSION 4,0,24,106
+FILEVERSION 4,0,29,111
+PRODUCTVERSION 4,0,29,111
 FILEFLAGSMASK 0x0
 FILEFLAGS 0x0
 FILEOS VOS_UNKNOWN
@@ -124,11 +129,11 @@ FILESUBTYPE VFT2_UNKNOWN
     {
       VALUE "CompanyName", "/-\\\\. |\\\\|. - Software\0"
       VALUE "FileDescription", "Show and Kill Processes - Version 4\0"
-      VALUE "FileVersion", "4.0.24.106\0"
+      VALUE "FileVersion", "4.0.29.111\0"
       VALUE "InternalName", "Kill Process 4\0"
       VALUE "OriginalFilename", "KillProcess4.exe\0"
       VALUE "ProductName", "Kill Process 4\0"
-      VALUE "ProductVersion", "4.0.24.106\0"
+      VALUE "ProductVersion", "4.0.29.111\0"
     }
   }
   BLOCK "VarFileInfo"
@@ -150,7 +155,9 @@ ID_TASTATUR ACCELERATORS
   65, CM_ABOUT, VIRTKEY, CONTROL
   83, CM_FILE_RESTART, VIRTKEY, CONTROL
   84, CM_TEST, VIRTKEY, CONTROL
+  85, CM_CHANGE_FOKUS, VIRTKEY, CONTROL
   88, CM_FILE_EXIT, VIRTKEY, CONTROL
+  89, CM_SYSTEMINFO, VIRTKEY, CONTROL
   "+", CM_FILE_ALL, ASCII
   "-", CM_FILE_NON, ASCII
 }

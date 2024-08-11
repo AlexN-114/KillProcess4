@@ -37,30 +37,30 @@ AddCharset = 1
 ExecEncoding = SYSTEM
 Encoding = windows-1252
 ModelType = 0
-ClassBrowserType = 0
+ClassBrowserType = 1
 AllowParallelBuilding = false
 ParellelBuildingJobs = 0
 UseUTF8 = 0
 
 
 [Unit1]
-FileName = KillProcess4_2K.ico
+FileName = Resource.rc
 CompileCpp = 0
-Folder = Others
-Compile = 0
+Folder = Resources
+Compile = 1
 Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = 
+RealEncoding = ASCII
 
 
 [Unit2]
-FileName = Resource.rc
+FileName = KillProcess.h
 CompileCpp = 0
-Folder = Resources
-Compile = 1
+Folder = Headers
+Compile = 0
 Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
@@ -78,44 +78,31 @@ Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = windows-1252
+RealEncoding = ASCII
 CompileCpp = 0
 
 
 [VersionInfo]
 Major = 4
 Minor = 0
-Release = 27
-Build = 460
+Release = 31
+Build = 534
 LanguageID = 1033
 CharsetID = 1252
 CompanyName = /-\\\\. |\\\\|. - Software
-FileVersion = 4.0.27.460
+FileVersion = 4.0.31.534
 FileDescription = Show and Kill Processes - Version 4
 InternalName = Kill Process 4
 LegalCopyright = 
 LegalTrademarks = 
 OriginalFilename = KillProcess4.exe
 ProductName = Kill Process 4
-ProductVersion = 4.0.27.460
+ProductVersion = 4.0.31.534
 AutoIncBuildNr = 1
 SyncProduct = 1
 
 
 [Unit4]
-FileName = KillProcess.h
-CompileCpp = 0
-Folder = Headers
-Compile = 0
-Link = 0
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = windows-1252
-
-
-[Unit5]
 FileName = Resource.h
 CompileCpp = 0
 Folder = Headers
@@ -128,15 +115,28 @@ FileEncoding = PROJECT
 RealEncoding = windows-1252
 
 
+[Unit5]
+FileName = KillProcess4_2K.ico
+CompileCpp = 0
+Folder = Others
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
+
 [CompilerSettings]
-c_cmd_opt_std = 
+c_cmd_opt_std = c11
 cc_cmd_opt_abort_on_error = 
 cc_cmd_opt_address_sanitizer = 
 cc_cmd_opt_check_iso_conformance = 
 cc_cmd_opt_debug_info = 
 cc_cmd_opt_inhibit_all_warning = 
 cc_cmd_opt_instruction = 
-cc_cmd_opt_optimize = fast
+cc_cmd_opt_optimize = s
 cc_cmd_opt_pointer_size = 
 cc_cmd_opt_profile_info = 
 cc_cmd_opt_stack_protector = 
