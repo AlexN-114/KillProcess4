@@ -1,3 +1,6 @@
+#ifndef HEADER_D6A2CA53AE6BFD13
+#define HEADER_D6A2CA53AE6BFD13
+
 
 #define IDC_MAIN_TEXT      1001
 #define ID_STATUSBAR       1002
@@ -27,6 +30,22 @@
 #define IDD_SHOW_HWND      4120
 #define IDD_SHOW_PRIO      4122
 #define IDD_SHOW_6432      4124
+#define IDD_SHOW_USAGE     4126
+#define IDD_SHOW_CPUTIME   4128
+#define IDD_SHOW_RESERVE   4130
+#define _IDD_SHOW_PID      4107
+#define _IDD_SHOW_PID_PAR  4109
+#define _IDD_SHOW_PPID     4111
+#define _IDD_SHOW_NAME     4113
+#define _IDD_SHOW_PATH     4115
+#define _IDD_SHOW_TITLE    4117
+#define _IDD_SHOW_THREADS  4119
+#define _IDD_SHOW_HWND     4121
+#define _IDD_SHOW_PRIO     4123
+#define _IDD_SHOW_6432     4125
+#define _IDD_SHOW_USAGE    4127
+#define _IDD_SHOW_CPUTIME  4129
+#define _IDD_SHOW_RESERVE  4131
 
 #define IDD_DISP_TEXT      4100
 #define IDD_STAT_EDIT      4101
@@ -53,7 +72,10 @@
 #define CM_SYSTEMINFO      9042
 #define CM_TEST            9101
 #define CM_CHANGE_FOKUS    9102
+#define CM_CHANGE_TOP      9103
 #define CM_CMENU_LINE      9201
 #define CM_CMENU_MODULES   9202
 #define CM_CMENU_THREADS   9203
+
+#endif // header guard 
 

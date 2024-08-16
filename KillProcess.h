@@ -20,9 +20,10 @@ typedef struct _TASK_LIST
     BOOL        flags;
     HANDLE      hwnd;
     USHORT      is64;
-    ULARGE_INTEGER    kernel;
-    ULARGE_INTEGER    user;
-    ULARGE_INTEGER    now;
+    ULARGE_INTEGER    Times[4];
+    ULARGE_INTEGER    oldTimes[4];
+    char        cputime[12];
+    char        cpuusage[7];
     CHAR        ProcessName[PROCESS_SIZE];
     CHAR        WindowTitle[TITLE_SIZE];
     char        ModulePath[MAX_PATH];
@@ -40,6 +41,8 @@ typedef struct _SHOW
     int hwnd;
     int prio;
     int is64;
+    int usage;
+    int cputime;
 //    int reserve;
 } SHOW, *PSHOW;
 

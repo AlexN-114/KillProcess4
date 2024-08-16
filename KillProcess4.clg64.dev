@@ -44,19 +44,6 @@ UseUTF8 = 0
 
 
 [Unit1]
-FileName = Resource.rc
-CompileCpp = 0
-Folder = Resources
-Compile = 1
-Link = 0
-Priority = 1000
-OverrideBuildCmd = 0
-BuildCmd = 
-FileEncoding = PROJECT
-RealEncoding = ASCII
-
-
-[Unit2]
 FileName = KillProcess.h
 CompileCpp = 0
 Folder = Headers
@@ -67,6 +54,19 @@ OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
 RealEncoding = windows-1252
+
+
+[Unit2]
+FileName = KillProcess4_2K.ico
+CompileCpp = 0
+Folder = Others
+Compile = 0
+Link = 0
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
 
 
 [Unit3]
@@ -85,40 +85,40 @@ CompileCpp = 0
 [VersionInfo]
 Major = 4
 Minor = 0
-Release = 31
-Build = 534
+Release = 32
+Build = 578
 LanguageID = 1033
 CharsetID = 1252
 CompanyName = /-\\\\. |\\\\|. - Software
-FileVersion = 4.0.31.534
+FileVersion = 4.0.32.578
 FileDescription = Show and Kill Processes - Version 4
 InternalName = Kill Process 4
 LegalCopyright = 
 LegalTrademarks = 
 OriginalFilename = KillProcess4.exe
 ProductName = Kill Process 4
-ProductVersion = 4.0.31.534
+ProductVersion = 4.0.32.578
 AutoIncBuildNr = 1
 SyncProduct = 1
 
 
 [Unit4]
-FileName = Resource.h
+FileName = Resource.rc
 CompileCpp = 0
-Folder = Headers
-Compile = 0
+Folder = Resources
+Compile = 1
 Link = 0
 Priority = 1000
 OverrideBuildCmd = 0
 BuildCmd = 
 FileEncoding = PROJECT
-RealEncoding = windows-1252
+RealEncoding = ASCII
 
 
 [Unit5]
-FileName = KillProcess4_2K.ico
+FileName = Resource.h
 CompileCpp = 0
-Folder = Others
+Folder = Headers
 Compile = 0
 Link = 0
 Priority = 1000
@@ -129,14 +129,14 @@ RealEncoding = ASCII
 
 
 [CompilerSettings]
-c_cmd_opt_std = c11
+c_cmd_opt_std = 
 cc_cmd_opt_abort_on_error = 
 cc_cmd_opt_address_sanitizer = 
 cc_cmd_opt_check_iso_conformance = 
 cc_cmd_opt_debug_info = 
 cc_cmd_opt_inhibit_all_warning = 
 cc_cmd_opt_instruction = 
-cc_cmd_opt_optimize = s
+cc_cmd_opt_optimize = fast
 cc_cmd_opt_pointer_size = 
 cc_cmd_opt_profile_info = 
 cc_cmd_opt_stack_protector = 

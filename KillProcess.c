@@ -22,7 +22,7 @@ char versStr[50];
 char trenner[5] = "|";
 TASK_LIST tlist[1024];
 TASK_LIST slist[1024];
-SHOW show = {7, 0, 25, 40, 30, 5, 8, 5, 3};
+SHOW show = {7, 0, 25, 40, 30, 5, 8, 5, 3, 5, 9};
 int iTopItem = 0;
 int iCaretItem = 0;
 int iStatusWidths[] = {100, 150, 275, 350, 425, -1};
@@ -46,6 +46,7 @@ int listTasks   = 0;
 int selected    = 0;
 int numSelected = 0;
 BOOL ForceKill  = TRUE;
+BOOL TopMost    = FALSE;
 
 char filt_name [MAX_PATH];
 char filt_pid  [MAX_PATH];
@@ -116,7 +117,6 @@ int cpuusage(void)
     FILETIME                ft_sys_user;
 
     FILETIME                ft_fun_time;
-    SYSTEMTIME              st_fun_time;
 
     ULARGE_INTEGER          ul_sys_idle;
     static ULARGE_INTEGER   ul_sys_idleold;
@@ -128,7 +128,7 @@ int cpuusage(void)
 
     GetSystemTimes(&ft_sys_idle, &ft_sys_kernel, &ft_sys_user); // This API was introduced in WinXP SP1
     GetSystemTimeAsFileTime(&ft_fun_time);
-    
+
     ul_sys_idle.LowPart  = ft_sys_idle.dwLowDateTime;
     ul_sys_idle.HighPart = ft_sys_idle.dwHighDateTime;
 
@@ -557,6 +557,29 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         bis++;
     }
 
+    if ((show.usage > 0) && ((bis + show.usage) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%-%ds%%", show.usage);
+        sprintf(&Line[bis], fStr, t.cpuusage);
+        Line[bis + show.usage] = 0;
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+
+    if ((show.cputime > 0) && ((bis + show.cputime) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%-%ds", show.cputime);
+        sprintf(&Line[bis], fStr, t.cputime);
+        Line[bis + show.cputime] = 0;
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+
+    }
+
     if ((show.name > 0) && ((bis + show.name) < lng))
     {
         //TODO
@@ -661,6 +684,26 @@ int CreateHead(char *Line, int lng)
         //TODO
         sprintf(fStr, "%%%ds", show.is64);
         sprintf(&Line[bis], fStr, "Bit");
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+
+    if ((show.usage > 0) && ((bis + show.usage) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%%ds", show.usage);
+        sprintf(&Line[bis], fStr, "CPU%");
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+
+    if ((show.cputime > 0) && ((bis + show.cputime) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%%ds", show.cputime);
+        sprintf(&Line[bis], fStr, "CPU-Time");
         bis = strlen(Line);
         Line[bis] = trenner[0];
         bis++;
@@ -821,16 +864,16 @@ int CreateLineInfo(TASK_LIST t, char *Line, int lng)
         strcat_s(Line, lng - strlen(Line), hStr);
         strcat_s(Line, lng - strlen(Line), "\r\n");
     }
-    
+
     {
         int us, ti;
         int std, min, sec;
-        
+
         GetProcessPidPerf(t.dwProcessId, &us, &ti);
-        std = ti/3600;
-        min = (ti-std*3600)/60;
+        std = ti / 3600;
+        min = (ti - std * 3600) / 60;
         sec = ti % 60;
-        sprintf_s(hStr, sizeof(hStr), "CPU Usage : %2d.%d%%\r\nTime      : %2d:%02d:%02d\r\n", us/10, us%10, std, min, sec);
+        sprintf_s(hStr, sizeof(hStr), "CPU Usage : %2d.%d%%\r\nTime      : %2d:%02d:%02d\r\n", us / 10, us % 10, std, min, sec);
         strcat_s(Line, lng - strlen(Line), hStr);
     }
 
@@ -840,10 +883,10 @@ int CreateLineInfo(TASK_LIST t, char *Line, int lng)
 void GetProcessPidPerf(DWORD dwPid, int *usage, int *time)
 {
     HANDLE hProcess;
-    
-    hProcess = OpenProcess(PROCESS_ALL_ACCESS,FALSE,dwPid);
-    
-    if(NULL != hProcess)
+
+    hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwPid);
+
+    if (NULL != hProcess)
     {
         GetProcessHandlePerf(hProcess, usage, time);
         CloseHandle(hProcess);
@@ -858,25 +901,17 @@ void GetProcessPidPerf(DWORD dwPid, int *usage, int *time)
 
 void GetProcessHandlePerf(HANDLE hProcess, int *usage, int *time)
 {
-    static INT64 oldSysTime=0;
+    static INT64 oldSysTime = 0;
     static INT64 SysTime;
     static ULARGE_INTEGER ui[4];
     static ULARGE_INTEGER old[4];
     static INT64 deltaS, deltaP;
-    
-    GetProcessTimes(hProcess,(LPFILETIME)&ui[__creation],(LPFILETIME)&ui[__exit],(LPFILETIME)&ui[__kernel],(LPFILETIME)&ui[__user]);
+
+    GetProcessTimes(hProcess, (LPFILETIME)&ui[__creation], (LPFILETIME)&ui[__exit], (LPFILETIME)&ui[__kernel], (LPFILETIME)&ui[__user]);
     SysTime = (ui[__kernel].QuadPart + ui[__user].QuadPart); // / si.dwNumberOfProcessors;
     GetSystemTimeAsFileTime((LPFILETIME)&ui[__exit]);
-//    if(oldSysTime == 0)
-//    {
-//        memcpy(old, ui, sizeof(old));
-//        oldSysTime = SysTime;
-//        Sleep(500);
-//        GetProcessHandlePerf(hProcess, usage, time);
-//        return;
-//    }
-    deltaP = SysTime-oldSysTime;
-    deltaS = ui[__exit].QuadPart-old[__exit].QuadPart;
+    deltaP = SysTime - oldSysTime;
+    deltaS = ui[__exit].QuadPart - old[__exit].QuadPart;
     *usage = ((deltaP) * 1000) / (deltaS);
     *time  = (SysTime) / 10000000;
 
@@ -889,6 +924,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     HANDLE hProcessSnap;
     HANDLE hProcess;
     PROCESSENTRY32 pe32;
+    TASK_LIST *t;
     HANDLE hTList = GetDlgItem(hWnd, IDC_MAIN_TEXT);
     char hStr[500];
     int oldCnt = 0;
@@ -896,6 +932,9 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     ULARGE_INTEGER prcTimes[4];
     ULARGE_INTEGER newTimes[4];
     static BOOL safe = TRUE;
+    static BOOL first = TRUE;
+
+    force = TRUE;
 
     if (! safe)
     {
@@ -906,10 +945,10 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         safe = FALSE;
     }
 
-    memset(tlist, 0, sizeof(tlist));
     listTasks = 0;
     numTasks = 0;
     trenner[0] = '|';
+
     // SendMessage(hTList, LB_RESETCONTENT, 0, 0);
 
     oldCnt = SendMessage(hTList, LB_GETCOUNT, 0, 0);
@@ -951,42 +990,60 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     // display information about each process in turn
     do
     {
-        if (force || (pe32.th32ProcessID != tlist[numTasks].dwProcessId))
+        t = &tlist[numTasks];
+
+        hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID );
+
+        if ( hProcess == NULL )
         {
-// _tprintf( TEXT("\n\n=====================================================" ));
-// _tprintf( TEXT("\nPROCESS NAME:  %s"), pe32.szExeFile );
-// _tprintf( TEXT("\n-------------------------------------------------------" ));
+            // printError( TEXT("OpenProcess") );
+        }
+        else
+        {
+            IsWow64Process(hProcess, (PBOOL)&t->is64);
 
+            GetProcessTimes(hProcess,
+                            (PFILETIME)&t->Times[__creation],
+                            (PFILETIME)&t->Times[__exit],
+                            (PFILETIME)&t->Times[__kernel],
+                            (PFILETIME)&t->Times[__user]);
+            GetSystemTimeAsFileTime((PFILETIME)&t->Times[__exit]);
+
+            ULONG64 tt = (t->Times[__exit].QuadPart - t->oldTimes[__exit].QuadPart);
+            ULONG64 ct = (t->Times[__kernel].QuadPart + t->Times[__user].QuadPart);
+            ULONG64 ot = (t->oldTimes[__kernel].QuadPart + t->oldTimes[__user].QuadPart);
+            int h, m, s;
+            ULONG64 us = ((ct - ot) * 1000) / tt;
+            sprintf_s(t->cpuusage, sizeof(t->cpuusage), "%3d.%d", us / 10, us % 10);
+            ct /= 10000000;
+            h = ct / 3600;
+            m = (ct - h * 3600) / 60;
+            s = ct % 60;
+            sprintf_s(t->cputime, sizeof(t->cputime), "%3d:%02d:%02d", h, m, s);
+
+            memcpy(&t->oldTimes, &t->Times, sizeof(t->oldTimes));
+
+            CloseHandle( hProcess );
+        }
+
+
+        if (force || (pe32.th32ProcessID != t->dwProcessId))
+        {
             // Retrieve the priority class.
-            hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID );
-            int err = GetLastError();
-            if ( hProcess == NULL )
-            {
-                // printError( TEXT("OpenProcess") );
-            }
-            else
-            {
-                IsWow64Process(hProcess, (PBOOL)&tlist[numTasks].is64);
-                //if ( !dwPriorityClass )
-                // printError( TEXT("GetPriorityClass") );
-                // GetProcessHandlePerf(hProcess, &u, &t);
-                CloseHandle( hProcess );
-            }
-
             // add to list
-            tlist[numTasks].dwProcessId = pe32.th32ProcessID;
-            tlist[numTasks].dwParentProcessId = pe32.th32ParentProcessID;
-            strcpy_s(tlist[numTasks].ProcessName, sizeof(tlist[numTasks].ProcessName), pe32.szExeFile);
-            tlist[numTasks].flags = pe32.dwFlags;
-            tlist[numTasks].cntThreads = pe32.cntThreads;
-            tlist[numTasks].dwModuleId = pe32.th32ModuleID;
-            tlist[numTasks].pcPriClassBase = pe32.pcPriClassBase;
-            GetFirstModulePath(pe32.th32ProcessID, tlist[numTasks].ModulePath);
-            //GetProcessImageFileName(hProcess, tlist[numTasks].ModulePath,sizeof(tlist[numTasks].ModulePath));
-            tlist[numTasks].hwnd = find_main_window(pe32.th32ProcessID);
-            GetWindowText(tlist[numTasks].hwnd, tlist[numTasks].WindowTitle, sizeof(tlist[numTasks].WindowTitle));
+            t->dwProcessId = pe32.th32ProcessID;
+            t->dwParentProcessId = pe32.th32ParentProcessID;
+            strcpy_s(t->ProcessName, sizeof(t->ProcessName), pe32.szExeFile);
+            t->flags = pe32.dwFlags;
+            t->cntThreads = pe32.cntThreads;
+            t->dwModuleId = pe32.th32ModuleID;
+            t->pcPriClassBase = pe32.pcPriClassBase;
+            GetFirstModulePath(pe32.th32ProcessID, t->ModulePath);
+            //GetProcessImageFileName(hProcess, t->ModulePath,sizeof(t->ModulePath));
+            t->hwnd = find_main_window(pe32.th32ProcessID);
+            GetWindowText(t->hwnd, t->WindowTitle, sizeof(t->WindowTitle));
 
-            if (FilterItem(tlist[numTasks]))
+            if (FilterItem(tlist[numTasks]) && (hTList != NULL))
             {
                 char xStr[sizeof(hStr)] = "";
 
@@ -1011,10 +1068,13 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
 
                 listTasks++;
             }
+            else
+            {
+                t->dwProcessId = 0;
+            }
         }
-        GetProcessInfo(&slist[numTasks]);
+        //GetProcessInfo(&tlist[numTasks]);
         numTasks++;
-
     }
     while (Process32Next(hProcessSnap, &pe32));
 
@@ -1179,7 +1239,7 @@ static LRESULT CALLBACK DlgDisplayL(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
             MoveWindow(hwndDlg, rMain.left + 50, rMain.top + 50, rMain.right - rMain.left - 100, rMain.bottom - rMain.top - 100, TRUE);
             CreateLineInfo(slist[i], hStr, sizeof(hStr));
             SetDlgItemText(hwndDlg, IDD_DISP_TEXT, hStr);
-            SetTimer(hwndDlg,IDT_REFRESH_LINE,500,NULL);
+            SetTimer(hwndDlg, IDT_REFRESH_LINE, 500, NULL);
             break;
         }
 
@@ -1193,7 +1253,7 @@ static LRESULT CALLBACK DlgDisplayL(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
             // UpdateWindow(hwndDlg);
             break;
         }
-        
+
         case WM_TIMER:
         {
             int i = SendMessage(GetDlgItem(hwnd_main, IDC_MAIN_TEXT), LB_GETCURSEL, 0, 0);
@@ -1339,6 +1399,12 @@ static LRESULT CALLBACK DlgProcShow(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
                 SetDlgItemText(hwndDlg, IDD_SHOW_PRIO, hStr);
                 itoa(show.is64, hStr, 10);
                 SetDlgItemText(hwndDlg, IDD_SHOW_6432, hStr);
+                itoa(show.usage, hStr, 10);
+                SetDlgItemText(hwndDlg, IDD_SHOW_USAGE, hStr);
+                itoa(show.cputime, hStr, 10);
+                SetDlgItemText(hwndDlg, IDD_SHOW_CPUTIME, hStr);
+                ShowWindow(GetDlgItem(hwndDlg, IDD_SHOW_RESERVE), SW_HIDE);
+                ShowWindow(GetDlgItem(hwndDlg, _IDD_SHOW_RESERVE), SW_HIDE);
             }
             return TRUE;
 
@@ -1364,6 +1430,10 @@ static LRESULT CALLBACK DlgProcShow(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
                     show.prio = atoi(hStr);
                     GetDlgItemText(hwndDlg, IDD_SHOW_6432, hStr, sizeof(hStr));
                     show.is64 = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_USAGE, hStr, sizeof(hStr));
+                    show.usage = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_CPUTIME, hStr, sizeof(hStr));
+                    show.cputime = atoi(hStr);
 
                     GetProcessList(hwnd_main, FALSE);
 
@@ -1386,6 +1456,14 @@ static LRESULT CALLBACK DlgProcShow(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
                     show.cntThreads = atoi(hStr);
                     GetDlgItemText(hwndDlg, IDD_SHOW_HWND, hStr, sizeof(hStr));
                     show.hwnd = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_PRIO, hStr, sizeof(hStr));
+                    show.prio = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_6432, hStr, sizeof(hStr));
+                    show.is64 = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_USAGE, hStr, sizeof(hStr));
+                    show.usage = atoi(hStr);
+                    GetDlgItemText(hwndDlg, IDD_SHOW_CPUTIME, hStr, sizeof(hStr));
+                    show.cputime = atoi(hStr);
 
                     GetProcessList(hwnd_main, TRUE);
 
@@ -1702,8 +1780,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
             if (wParam != SIZE_MINIMIZED)
             {
-                char hStr[500];
-
                 MoveWindow(hwnd_header, 1, 0, rClient.right, hHeader, TRUE);
                 //GetWindowRect(hwnd_header, &r);
                 //InvalidateRect(NULL, &r, TRUE);
@@ -1782,7 +1858,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
                 case CM_SYSTEMINFO:
                 {
+                    SYSTEM_INFO si;
                     char *proc;
+
+                    GetNativeSystemInfo(&si);
 
                     switch (si.wProcessorArchitecture)
                     {
@@ -1876,7 +1955,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                     //ShowWindow(hDisplay, TRUE);
                     break;
                 }
-                
+
                 case CM_CHANGE_FOKUS:
                 {
                     HANDLE hwndF = GetFocus();
@@ -1888,6 +1967,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                     {
                         SetFocus(hwnd_sedit);
                     }
+                    break;
+                }
+
+                case CM_CHANGE_TOP:
+                {
+                    if (!TopMost)
+                    {
+                        SetWindowPos (hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                    }
+                    else
+                    {
+                        SetWindowPos (hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                    }
+                    TopMost = !TopMost;
                     break;
                 }
 
@@ -2035,7 +2128,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 }
 
                 //TrackPopupMenu()
-                sprintf_s(hStr, sizeof(hStr), "%d/%d/%c/%c ", konv.pt.x, konv.pt.y, (l) ? 'L' : ' ', (r) ? 'R' : ' ');
+                sprintf_s(hStr, sizeof(hStr), "%d/%d/%c/%c/%c ", konv.pt.x, konv.pt.y, (l) ? 'L' : ' ', (r) ? 'R' : ' ',(TopMost)?135:32);
                 SendMessage(hwnd_StatusBar, SB_SETTEXT, 3, (LPARAM)hStr);
 
                 return TRUE;
@@ -2043,13 +2136,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
             else if (wParam == IDT_REFRESH)
             {
                 char hStr[50];
-                int cu;
+                int cu = cpuusage();
 
                 GetProcessList(hwnd_main, FALSE);
-                
-                cu = cpuusage();
 
-                sprintf_s(hStr, sizeof(hStr), "CPU:%3d.%d%%", cu/10,cu%10);
+                sprintf_s(hStr, sizeof(hStr), "CPU:%3d.%d%%", cu / 10, cu % 10);
                 SendMessage(hwnd_StatusBar, SB_SETTEXT, 4, (LPARAM)hStr);
             }
             break;
@@ -2161,14 +2252,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     MSG msg; /* A temporary location for all messages */
     HANDLE hAccelTable = NULL;
 
-    GetNativeSystemInfo(&si);
-    
     ScanCmdLine(lpCmdLine);
-    GetProcessList(NULL, TRUE);
+    GetProcessList(NULL, FALSE);
     doCmdLine();
 
     ReadFromPipe();
-        
+
     /* zero out the struct and set the stuff we want to modify */
     memset(&wc, 0, sizeof(wc));
     wc.cbSize = sizeof(WNDCLASSEX);
