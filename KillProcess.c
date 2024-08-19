@@ -1107,6 +1107,8 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         iCaretItem = 0;
     }
     safe = TRUE;
+    
+    CloseHandle(hTList);
 
     return ( TRUE );
 }
@@ -1766,7 +1768,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
             AppendMenu(hContext, MF_STRING, CM_CMENU_THREADS, "Show &Threads");
             GetProcessList(hwnd, FALSE);
 
-            SetFocus(hwnd_client);
+            //SetFocus(hwnd_client);
+            SendMessage(hwnd, WM_PAINT, 0, 0);
+            break;
+        }
+        case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            RECT r;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            HPEN hPen = CreatePen(PS_SOLID, 1, RGB(10,10,10));
+            SelectPen(hdc, hPen);
+            GetWindowRect(hwnd_client, &r);
+            MoveToEx(hdc, 62,0,NULL);
+            LineTo(hdc, 62,r.bottom-r.top);
+            DeleteObject(hPen);
+            EndPaint(hwnd, &ps);
             break;
         }
         case WM_SIZE:
@@ -1967,6 +1984,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                     {
                         SetFocus(hwnd_sedit);
                     }
+                    CloseHandle(hwndF);
                     break;
                 }
 

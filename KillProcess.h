@@ -79,7 +79,6 @@ int CreateLine(TASK_LIST t, char *Line, int lng);
 int CreateHead(char *Line, int lng);
 int CreateLineInfo(TASK_LIST t, char *Line, int lng);
 BOOL ListProcessModules( DWORD dwPID, HWND hwnd);
-BOOL ListProcessThreads( DWORD dwPID, HWND hwnd);
 void GetProcessPidPerf(DWORD dwPid, int *usage, int *time);
 void GetProcessHandlePerf(HANDLE hProcess, int *usage, int *time);
 
