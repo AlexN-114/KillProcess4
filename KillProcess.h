@@ -24,6 +24,7 @@ typedef struct _TASK_LIST
     ULARGE_INTEGER    oldTimes[4];
     char        cputime[12];
     char        cpuusage[7];
+    DWORD       handle;
     CHAR        ProcessName[PROCESS_SIZE];
     CHAR        WindowTitle[TITLE_SIZE];
     char        ModulePath[MAX_PATH];
@@ -43,6 +44,7 @@ typedef struct _SHOW
     int is64;
     int usage;
     int cputime;
+    int handle;
 //    int reserve;
 } SHOW, *PSHOW;
 
@@ -79,6 +81,7 @@ int CreateLine(TASK_LIST t, char *Line, int lng);
 int CreateHead(char *Line, int lng);
 int CreateLineInfo(TASK_LIST t, char *Line, int lng);
 BOOL ListProcessModules( DWORD dwPID, HWND hwnd);
+BOOL ListProcessThreads( DWORD dwPID, HWND hwnd);
 void GetProcessPidPerf(DWORD dwPid, int *usage, int *time);
 void GetProcessHandlePerf(HANDLE hProcess, int *usage, int *time);
 

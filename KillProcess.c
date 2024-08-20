@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <windowsx.h>
+#include <winbase.h>
 #include <commctrl.h>
 #include <tlhelp32.h>
 #include <psapi.h>
@@ -22,7 +23,7 @@ char versStr[50];
 char trenner[5] = "|";
 TASK_LIST tlist[1024];
 TASK_LIST slist[1024];
-SHOW show = {7, 0, 25, 40, 30, 5, 8, 5, 3, 5, 9};
+SHOW show = {7, 0, 25, 40, 30, 5, 8, 5, 3, 5, 9, 4};
 int iTopItem = 0;
 int iCaretItem = 0;
 int iStatusWidths[] = {100, 150, 275, 350, 425, -1};
@@ -72,6 +73,7 @@ char* GetVersionString(char *szModul, char *szVersion)
         hModule = GetModuleHandle(NULL);
         GetModuleFileName(hModule, szName, MAX_PATH);
         pModule = szName;
+        CloseHandle(hModule);
     }
     vis = GetFileVersionInfoSize (pModule, NULL);
     if (vis)
@@ -214,6 +216,7 @@ BOOL EnableDebugPrivNT( VOID )
         }
         SetWindowText(hwnd_main, hStr);
     }
+    CloseHandle(hToken);
 
     return TRUE;
 }
@@ -624,6 +627,17 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         bis++;
     }
 
+    if ((show.handle > 0) && ((bis + show.handle) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%%dd", show.handle);
+        sprintf(&Line[bis], fStr, t.handle);
+        Line[bis + show.handle] = 0;
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+    
     if ((show.hwnd > 0) && ((bis + show.hwnd) < lng))
     {
         //TODO
@@ -752,6 +766,16 @@ int CreateHead(char *Line, int lng)
         bis++;
     }
 
+    if ((show.handle > 0) && ((bis + show.handle) < lng))
+    {
+        //TODO
+        sprintf(fStr, "%%%ds", show.handle);
+        sprintf(&Line[bis], fStr, "Hndl");
+        bis = strlen(Line);
+        Line[bis] = trenner[0];
+        bis++;
+    }
+    
     if ((show.hwnd > 0) && ((bis + show.hwnd) < lng))
     {
         //TODO
@@ -843,6 +867,17 @@ int CreateLineInfo(TASK_LIST t, char *Line, int lng)
         strcat_s(Line, lng - strlen(Line), "\r\n");
     }
 
+    if (show.handle > 0)
+    {
+        //TODO
+        sprintf_s(fStr, sizeof(fStr), "%%-%dd", show.handle);
+        sprintf_s(hStr, sizeof(fStr), fStr, t.handle);
+        
+        strcat_s(Line, lng - strlen(Line), "Handles   : ");
+        strcat_s(Line, lng - strlen(Line), hStr);
+        strcat_s(Line, lng - strlen(Line), "\r\n");
+    }
+    
     if (show.hwnd > 0)
     {
         //TODO
@@ -913,7 +948,7 @@ void GetProcessHandlePerf(HANDLE hProcess, int *usage, int *time)
     deltaP = SysTime - oldSysTime;
     deltaS = ui[__exit].QuadPart - old[__exit].QuadPart;
     *usage = ((deltaP) * 1000) / (deltaS);
-    *time  = (SysTime) / 10000000;
+    *time  = (SysTime) / 100000000;
 
     memcpy(old, ui, sizeof(old));
     oldSysTime = SysTime;
@@ -929,10 +964,8 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     char hStr[500];
     int oldCnt = 0;
     int oldListTasks = listTasks;
-    ULARGE_INTEGER prcTimes[4];
-    ULARGE_INTEGER newTimes[4];
     static BOOL safe = TRUE;
-    static BOOL first = TRUE;
+    DWORD count;
 
     force = TRUE;
 
@@ -945,6 +978,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         safe = FALSE;
     }
 
+    GetProcessHandleCount(GetCurrentProcess(), &count);
     listTasks = 0;
     numTasks = 0;
     trenner[0] = '|';
@@ -964,11 +998,14 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
 
     EnableDebugPrivNT();
 
+    GetProcessHandleCount(GetCurrentProcess(), &count);
+    
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
     if ( hProcessSnap == INVALID_HANDLE_VALUE )
     {
         MessageBox(hwnd_main, "CreateToolhelp32Snapshot (of processes)", "Error", MB_ICONERROR);
+        CloseHandle(hTList);
         safe = TRUE;
         return ( FALSE );
     }
@@ -982,6 +1019,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     {
         // printError( TEXT("Process32First") ); // show cause of failure
         CloseHandle( hProcessSnap ); // clean the snapshot object
+        CloseHandle(hTList);
         safe = TRUE;
         return ( FALSE );
     }
@@ -993,6 +1031,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         t = &tlist[numTasks];
 
         hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID );
+        
 
         if ( hProcess == NULL )
         {
@@ -1002,6 +1041,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         {
             IsWow64Process(hProcess, (PBOOL)&t->is64);
 
+            GetProcessHandleCount(hProcess, &t->handle);
             GetProcessTimes(hProcess,
                             (PFILETIME)&t->Times[__creation],
                             (PFILETIME)&t->Times[__exit],
@@ -1023,7 +1063,6 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
 
             memcpy(&t->oldTimes, &t->Times, sizeof(t->oldTimes));
 
-            CloseHandle( hProcess );
         }
 
 
@@ -1039,7 +1078,9 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
             t->dwModuleId = pe32.th32ModuleID;
             t->pcPriClassBase = pe32.pcPriClassBase;
             GetFirstModulePath(pe32.th32ProcessID, t->ModulePath);
+            //QueryFullProcessImageName(hProcess,0,t->ModulePath,sizeof(t->ModulePath));
             //GetProcessImageFileName(hProcess, t->ModulePath,sizeof(t->ModulePath));
+            //GetModuleBaseName(hProcess, NULL, t->ModulePath,sizeof(t->ModulePath));
             t->hwnd = find_main_window(pe32.th32ProcessID);
             GetWindowText(t->hwnd, t->WindowTitle, sizeof(t->WindowTitle));
 
@@ -1073,7 +1114,13 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
                 t->dwProcessId = 0;
             }
         }
-        //GetProcessInfo(&tlist[numTasks]);
+        
+        if (hProcess != NULL)
+        {
+            CloseHandle(hProcess);
+            hProcess = NULL;
+        }
+         //GetProcessInfo(&tlist[numTasks]);
         numTasks++;
     }
     while (Process32Next(hProcessSnap, &pe32));
@@ -1107,8 +1154,10 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         iCaretItem = 0;
     }
     safe = TRUE;
-    
+
     CloseHandle(hTList);
+    
+    GetProcessHandleCount(GetCurrentProcess(), &count);
 
     return ( TRUE );
 }
@@ -1218,6 +1267,7 @@ int KillMulti(HWND hDlg)
             }
 
         }
+        CloseHandle(hListBox);
         Sleep(1000);
         GetProcessList(hDlg, FALSE);
     }
@@ -1825,7 +1875,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
             break;
 
         case WM_SETFOCUS:
-            SetFocus(GetDlgItem(hwnd, IDC_MAIN_TEXT));
+            // SetFocus(GetDlgItem(hwnd, IDC_MAIN_TEXT));
             break;
 
         case WM_COMMAND:
@@ -2190,6 +2240,7 @@ void RestartAsAdmin(void)
 
     mod = GetModuleHandle(NULL);
     GetModuleFileName(mod, name, sizeof(name));
+    CloseHandle(mod);
     Shex.cbSize = sizeof(Shex);
     Shex.fMask = SEE_MASK_NO_CONSOLE;
     Shex.lpVerb = "runas";
