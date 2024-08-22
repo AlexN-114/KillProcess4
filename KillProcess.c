@@ -171,6 +171,7 @@ BOOL EnableDebugPrivNT( VOID )
                           &hToken))
     {
         fprintf(stderr, "OpenProcessToken failed with %lu\n", GetLastError());
+        CloseHandle(hToken);
         return FALSE;
     }
 
@@ -182,6 +183,7 @@ BOOL EnableDebugPrivNT( VOID )
                               &DebugValue))
     {
         fprintf(stderr, "LookupPrivilegeValue failed with %lu\n", GetLastError());
+        CloseHandle(hToken);
         return FALSE;
     }
 
@@ -202,6 +204,7 @@ BOOL EnableDebugPrivNT( VOID )
     if (GetLastError() != ERROR_SUCCESS)
     {
         printf("AdjustTokenPrivileges failed with %lu\n", GetLastError());
+        CloseHandle(hToken);
         return FALSE;
     }
     else
@@ -995,10 +998,9 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         iCaretItem = SendMessage(hTList, LB_GETCARETINDEX, 0, 0);
     }
 
-
     EnableDebugPrivNT();
 
-    GetProcessHandleCount(GetCurrentProcess(), &count);
+    //GetProcessHandleCount(GetCurrentProcess(), &count);
     
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
@@ -1018,7 +1020,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     if ( !Process32First( hProcessSnap, &pe32 ) )
     {
         // printError( TEXT("Process32First") ); // show cause of failure
-        CloseHandle( hProcessSnap ); // clean the snapshot object
+        CloseHandle(hProcessSnap);    // clean the snapshot object
         CloseHandle(hTList);
         safe = TRUE;
         return ( FALSE );
