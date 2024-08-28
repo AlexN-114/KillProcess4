@@ -20,6 +20,8 @@
 #define IDD_EDIT_PID       4005
 #define IDD_STAT_TITLE     4006
 #define IDD_EDIT_TITLE     4007
+#define IDD_STAT_BASE      4008
+
 #define IDD_SHOW_PID       4106
 #define IDD_SHOW_PID_PAR   4108
 #define IDD_SHOW_PPID      4110

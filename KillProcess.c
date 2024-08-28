@@ -28,6 +28,7 @@ int iTopItem = 0;
 int iCaretItem = 0;
 int iStatusWidths[] = {100, 150, 275, 350, 425, -1};
 HWND hwnd_main = NULL;
+HWND hwnd_base = NULL;
 HWND hwnd_header = NULL;
 HWND hwnd_client = NULL;
 HWND hwnd_StatusBar = NULL;
@@ -96,6 +97,21 @@ char* GetVersionString(char *szModul, char *szVersion)
         szVersion[0] = 0;
     }
     return szVersion;
+}
+
+
+HWND GetHScroll(HWND hwnd)
+{
+    HWND hHScroll = GetWindow(hwnd, GW_CHILD);
+
+    while (hHScroll)
+    {
+        if (GetWindowLong(hHScroll, GWL_STYLE) &  WS_HSCROLL)
+        {
+            break;
+        }
+    }
+    return hHScroll;
 }
 
 //----------------------------------------------------------------------------------------------------------------
@@ -203,8 +219,8 @@ BOOL EnableDebugPrivNT( VOID )
     //
     if (GetLastError() != ERROR_SUCCESS)
     {
-        printf("AdjustTokenPrivileges failed with %lu\n", GetLastError());
         CloseHandle(hToken);
+        printf("AdjustTokenPrivileges failed with %lu\n", GetLastError());
         return FALSE;
     }
     else
@@ -640,7 +656,7 @@ int CreateLine(TASK_LIST t, char *Line, int lng)
         Line[bis] = trenner[0];
         bis++;
     }
-    
+
     if ((show.hwnd > 0) && ((bis + show.hwnd) < lng))
     {
         //TODO
@@ -778,7 +794,7 @@ int CreateHead(char *Line, int lng)
         Line[bis] = trenner[0];
         bis++;
     }
-    
+
     if ((show.hwnd > 0) && ((bis + show.hwnd) < lng))
     {
         //TODO
@@ -875,12 +891,12 @@ int CreateLineInfo(TASK_LIST t, char *Line, int lng)
         //TODO
         sprintf_s(fStr, sizeof(fStr), "%%-%dd", show.handle);
         sprintf_s(hStr, sizeof(fStr), fStr, t.handle);
-        
+
         strcat_s(Line, lng - strlen(Line), "Handles   : ");
         strcat_s(Line, lng - strlen(Line), hStr);
         strcat_s(Line, lng - strlen(Line), "\r\n");
     }
-    
+
     if (show.hwnd > 0)
     {
         //TODO
@@ -963,7 +979,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     HANDLE hProcess;
     PROCESSENTRY32 pe32;
     TASK_LIST *t;
-    HANDLE hTList = GetDlgItem(hWnd, IDC_MAIN_TEXT);
+    HANDLE hTList = hwnd_client;
     char hStr[500];
     int oldCnt = 0;
     int oldListTasks = listTasks;
@@ -981,7 +997,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         safe = FALSE;
     }
 
-    GetProcessHandleCount(GetCurrentProcess(), &count);
+    // GetProcessHandleCount(GetCurrentProcess(), &count);
     listTasks = 0;
     numTasks = 0;
     trenner[0] = '|';
@@ -1001,7 +1017,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     EnableDebugPrivNT();
 
     //GetProcessHandleCount(GetCurrentProcess(), &count);
-    
+
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
     if ( hProcessSnap == INVALID_HANDLE_VALUE )
@@ -1033,7 +1049,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
         t = &tlist[numTasks];
 
         hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID );
-        
+
 
         if ( hProcess == NULL )
         {
@@ -1065,6 +1081,7 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
 
             memcpy(&t->oldTimes, &t->Times, sizeof(t->oldTimes));
 
+            CloseHandle( hProcess );
         }
 
 
@@ -1116,13 +1133,13 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
                 t->dwProcessId = 0;
             }
         }
-        
+
         if (hProcess != NULL)
         {
             CloseHandle(hProcess);
             hProcess = NULL;
         }
-         //GetProcessInfo(&tlist[numTasks]);
+        //GetProcessInfo(&tlist[numTasks]);
         numTasks++;
     }
     while (Process32Next(hProcessSnap, &pe32));
@@ -1137,7 +1154,6 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     // SetWindowText(hWnd, hStr);
     sprintf_s(hStr, sizeof(hStr), "%d/%d/%d ", numSelected, listTasks, numTasks);
     SendMessage(hwnd_StatusBar, SB_SETTEXT, 0, (LPARAM)hStr);
-    CloseHandle( hProcessSnap );
 
     char xStr[sizeof(hStr)];
     CreateHead(hStr, sizeof(hStr));
@@ -1157,8 +1173,9 @@ BOOL GetProcessList(HWND hWnd, BOOL force)
     }
     safe = TRUE;
 
+    CloseHandle(hProcessSnap);
     CloseHandle(hTList);
-    
+
     GetProcessHandleCount(GetCurrentProcess(), &count);
 
     return ( TRUE );
@@ -1756,11 +1773,72 @@ static int ScanCmdLine(const char *cmdline)
     return argc;
 }
 
+LRESULT CALLBACK WndBaseProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    static int xPos = 0; // Aktuelle horizontale Position
+    int x;
+    RECT r;
+    HDC hdc;
+    SIZE size;
+    char hStr[500];
+
+    switch (uMsg)
+    {
+        case WM_CREATE:
+            GetClientRect(hwnd_main, &r);
+            MoveWindow(hwnd_base, 0, 7, r.right - r.left, r.bottom - r.top - 20, TRUE);
+            return 0;
+
+        case WM_SIZE:
+            GetClientRect(hwnd_main, &r);
+            MoveWindow(hwnd_base, 0, 7, r.right - r.left, r.bottom - r.top - 20, TRUE);
+            hdc = GetWindowDC(hwnd_header);
+            GetWindowText(hwnd_header, hStr, sizeof(hStr));
+            GetTextExtentPoint32(hdc, hStr, strlen(hStr), &size);
+            SetScrollRange(hwnd_base, SB_HORZ, 0, size.cx, TRUE);
+            break;
+
+        case WM_HSCROLL:
+
+        switch (LOWORD(wParam))
+            {
+                case SB_LINELEFT:
+                    xPos -= 8; // Eine Einheit nach links scrollen
+                    break;
+                case SB_LINERIGHT:
+                    xPos += 8; // Eine Einheit nach rechts scrollen
+                    break;
+                case SB_PAGELEFT:
+                    xPos -= 80; // Eine Seite nach links scrollen
+                    break;
+                case SB_PAGERIGHT:
+                    xPos += 80; // Eine Seite nach rechts scrollen
+                    break;
+                case SB_THUMBPOSITION:
+                case SB_THUMBTRACK:
+                    xPos = HIWORD(wParam); // Position des Bildlauffelds setzen
+                    break;
+                case SB_ENDSCROLL:
+                    // Scrollen beenden
+                    break;
+            }
+            // Position des Bildlauffelds aktualisieren
+            SetScrollPos(hwnd, SB_HORZ, xPos, TRUE);
+            InvalidateRect(hwnd, NULL, TRUE); // Fensterinhalt neu zeichnen
+            return 0;
+        case WM_VSCROLL:
+            // Vertikales Scrollen behandeln (ähnlich wie horizontales Scrollen)
+            return 0;
+    }
+
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     char mStr[200];
-    RECT rClient, rStatus;
+    RECT rBase, rClient, rStatus;
     RECT r;
+    int x;
     DWORD h;
     UINT uStatusHeight;
 
@@ -1768,7 +1846,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
     {
         case WM_CREATE:
         {
-            int x;
             hwnd_main = hwnd;
 
             // Move window when we got it from pipe
@@ -1778,17 +1855,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 MoveWindow(hwnd, rMain.left, rMain.top, rMain.right - rMain.left, rMain.bottom - rMain.top, TRUE);
             }
 
+            // Create Base
+            hwnd_base = CreateWindow("Static", "", WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_OVERLAPPED,
+                                     CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwnd, (HMENU)IDD_STAT_BASE, GetModuleHandle(NULL), NULL);
+            LONG_PTR oldProc = SetWindowLongPtr(hwnd_base, GWLP_WNDPROC, (LONG_PTR)WndBaseProc);
+            ShowWindow(hwnd_base, TRUE);
             // Create client
-            hwnd_client = CreateWindow("ListBox", "",  LBS_MULTIPLESEL | WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwnd, (HMENU)IDC_MAIN_TEXT, GetModuleHandle(NULL), NULL);
-            x = SendDlgItemMessage(hwnd, IDC_MAIN_TEXT, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), MAKELPARAM(TRUE, 0));
+            hwnd_client = CreateWindow("ListBox", "",  LBS_MULTIPLESEL | WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_VSCROLL,
+                                       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwnd_base, (HMENU)IDC_MAIN_TEXT, GetModuleHandle(NULL), NULL);
+            x = SendDlgItemMessage(hwnd_base, IDC_MAIN_TEXT, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), MAKELPARAM(TRUE, 0));
+            SendMessage(hwnd_client, LB_INITSTORAGE, 1000, 500);
             sprintf_s(mStr, sizeof(mStr), "Kill Process: Version %s", versStr);
 
             h = SendMessage(hwnd_client, LB_GETITEMHEIGHT, 0, 0);
             hHeader = h + 2;
 
             // Header window
-            hwnd_header = CreateWindow("Static", "",  WS_BORDER | WS_CHILD | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwnd, (HMENU)IDC_MAIN_HEAD, GetModuleHandle(NULL), NULL);
-            x = SendDlgItemMessage(hwnd, IDC_MAIN_HEAD, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), MAKELPARAM(TRUE, 0));
+            hwnd_header = CreateWindow("Static", "",  WS_BORDER | WS_CHILD | WS_VISIBLE | WS_OVERLAPPED,
+                                       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hwnd_base, (HMENU)IDC_MAIN_HEAD, GetModuleHandle(NULL), NULL);
+            x = SendDlgItemMessage(hwnd_base, IDC_MAIN_HEAD, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), MAKELPARAM(TRUE, 0));
 
 
             // Create Statusbar
@@ -1820,44 +1905,55 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
             AppendMenu(hContext, MF_STRING, CM_CMENU_THREADS, "Show &Threads");
             GetProcessList(hwnd, FALSE);
 
-            //SetFocus(hwnd_client);
-            SendMessage(hwnd, WM_PAINT, 0, 0);
+//          SetFocus(hwnd_client);
+//          SendMessage(hwnd, WM_PAINT, 0, 0);
             break;
         }
-        case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            RECT r;
-            HDC hdc = BeginPaint(hwnd, &ps);
-            HPEN hPen = CreatePen(PS_SOLID, 1, RGB(10,10,10));
-            SelectPen(hdc, hPen);
-            GetWindowRect(hwnd_client, &r);
-            MoveToEx(hdc, 62,0,NULL);
-            LineTo(hdc, 62,r.bottom-r.top);
-            DeleteObject(hPen);
-            EndPaint(hwnd, &ps);
-            break;
-        }
+//    case WM_PAINT:
+//    {
+//        PAINTSTRUCT ps;
+//        RECT r1, r2;
+//        HDC hdc = BeginPaint(hwnd, &ps);
+//        HPEN hPen = CreatePen(PS_SOLID, 1, RGB(10, 10, 10));
+//        SelectPen(hdc, hPen);
+//        GetWindowRect(hwnd_client, &r1);
+//        GetWindowRect(hwnd_StatusBar,&r2);
+//        MoveToEx(hdc, 62, 0, NULL);
+//        LineTo(hdc, 62, r2.top - r1.top);
+//        DeleteObject(hPen);
+//        EndPaint(hwnd, &ps);
+//        break;
+//    }
         case WM_SIZE:
         {
             SendMessage(hwnd_StatusBar, WM_SIZE, 0, 0);
 
             GetWindowRect(hwnd, &rMain);
-            GetClientRect(hwnd, &rClient);
+            GetClientRect(hwnd, &rBase);
+            GetClientRect(hwnd_base, &rClient);
             GetWindowRect(hwnd_StatusBar, &rStatus);
             uStatusHeight = rStatus.bottom - rStatus.top;
 
             if (wParam != SIZE_MINIMIZED)
             {
-                MoveWindow(hwnd_header, 1, 0, rClient.right, hHeader, TRUE);
+                MoveWindow(hwnd_base, 0, 0, rBase.right, rBase.bottom - uStatusHeight, TRUE);
+                MoveWindow(hwnd_header, 1, 0, rBase.right, hHeader, TRUE);
                 //GetWindowRect(hwnd_header, &r);
                 //InvalidateRect(NULL, &r, TRUE);
                 CreateHead(mStr, sizeof(mStr));
                 SetWindowText(hwnd_header, mStr);
 
-                MoveWindow(hwnd_client, 0, hHeader, rClient.right, rClient.bottom - uStatusHeight - hHeader, TRUE);
+                MoveWindow(hwnd_client, 0, hHeader, rBase.right, rBase.bottom - uStatusHeight - hHeader, TRUE);
                 MoveWindow(hwnd_sedit, rStatus.left + iStatusWidths[1] + 2, rStatus.top + 2, iStatusWidths[2] - iStatusWidths[1], rStatus.bottom - rStatus.top - 2, TRUE);
                 ShowWindow(hwnd_sedit, SW_SHOW);
+
+                x = SendMessage(hwnd_client, LB_GETTEXTLEN, 0, (LPARAM)&r);
+                x *= 8;
+
+                SetScrollRange(hwnd_base, SB_HORZ, 0, 100, TRUE);
+                //SendMessage(hwnd_base, LB_SETHORIZONTALEXTENT, 1220, 0);
+                //SendMessage(hwnd_client, LB_SETHORIZONTALEXTENT, x, 0);
+                //SendMessage(hwnd_header, LB_SETHORIZONTALEXTENT, x, 0);
             }
 
             if (0 < iTopItem)
@@ -2149,12 +2245,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                     SendMessage(hwnd_StatusBar, SB_SETTEXT, 0, (LPARAM)hStr);
                     return TRUE;
                 }
+
                 GetWindowText(hwnd_sedit, filt_name, sizeof(filt_name));
                 if (strcmp(filt_name, old) != 0)
                 {
-                    strcpy(old, filt_name);
                     GetProcessList(hwnd_main, FALSE);
                 }
+
             }
             else if (wParam == IDT_ACTION)
             {
@@ -2196,9 +2293,35 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                     }
                     rr = r;
                 }
+                // set HScroll  for head line
+                if (0)
+                {
+                    int pos = 0;
+                    static int opos = 0;
+                    pos = GetScrollPos(hwnd_client, SB_HORZ);
+                    if (opos != pos)
+                    {
+                        RECT r;
+                        GetWindowRect(hwnd_header, &r);
+                        ScrollWindow(hwnd_header, opos - pos, 0, NULL, NULL);
+                        opos = pos;
+                    }
+                }
+
+                // set HScroll  for head line
+                static int opos = 0;
+                int pos = 0;
+                pos = GetScrollPos(hwnd_client, SB_HORZ);
+                if (opos != pos)
+                {
+                    RECT r;
+                    GetWindowRect(hwnd_header, &r);
+                    ScrollWindow(hwnd_header, opos - pos, 0, NULL, NULL);
+                    opos = pos;
+                }
 
                 //TrackPopupMenu()
-                sprintf_s(hStr, sizeof(hStr), "%d/%d/%c/%c/%c ", konv.pt.x, konv.pt.y, (l) ? 'L' : ' ', (r) ? 'R' : ' ',(TopMost)?135:32);
+                sprintf_s(hStr, sizeof(hStr), "%d/%d/%c/%c/%c ", konv.pt.x, konv.pt.y, (l) ? 'L' : ' ', (r) ? 'R' : ' ', (TopMost) ? 135 : 32);
                 SendMessage(hwnd_StatusBar, SB_SETTEXT, 3, (LPARAM)hStr);
 
                 return TRUE;
